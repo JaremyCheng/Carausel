@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src='http://apps.bdimg.com/libs/jquery/1.9.1/jquery.min.js'></script>
+	<link rel="stylesheet" href="lunbo.css">
+	
+</head>
+<body>
+	<div class="carousel">
+		<ul class='pages-ul'>
+			<li class='page'><img src="http://oss2.rabbitpre.com/rp/static/page/index/img/banner-midautumn_3ed5e42.jpg" alt="" /></li>
+			<li class='page'><img src="http://oss2.rabbitpre.com/rp/static/page/index/img/banner-midautumn_3ed5e42.jpg" alt="" /></li>
+			<li class='page'><img src="http://oss2.rabbitpre.com/rp/static/page/index/img/banner-midautumn_3ed5e42.jpg" alt="" /></li>
+			<li class='page'><img src="http://oss2.rabbitpre.com/rp/static/page/index/img/banner-midautumn_3ed5e42.jpg" alt="" /></li>
+		</ul>
+	</div>
+	<script>
+	var Carousel = function(opts){
+		this.dom = opts.dom;
+		this.isLoading = opts.isLoading;
+		this.isPoint = opts.isPoint;
+		this.isArrow = opts.isArrow;
+		this.beforeChange = opts.beforeChange;
+		this.afterChange = opts.afterChange;
+		this.duration = opts.duration ? opts.duration : 8000;
+		this.timer = null;
+		this.pageNum = 0;
+		this.init();
+		this.bindEvents();
+	}
+	Carousel.prototype.init = function(){
+		var pageLen = this.dom.find('.page').length;
+		var arrowHtml = "",
+			pointHtml = "",
+			loadingHtml = "",
+			pluginHtml = "";
+		this.dom.find('.pages-ul').css("width", pageLen * 100 + "%");
+		this.dom.find('.page').css('width', 100/pageLen+"%");
+		if(this.isLoading){
+			loadingHtml = "<div class='c-loading'><div class='loading-bar'></div></div>";
+			pluginHtml += loadingHtml;
+		}
+		if(this.isPoint){
+			pointHtml = "<div class='c-points' style='width:" + 18 * pageLen + "px'>"
+			for(var i = 0;i < pageLen;i++){
+				pointHtml += "<div class='c-point'></div>";
+			}
+			pointHtml += "</div>"
+			pluginHtml += pointHtml;
+		}
+		if(this.isArrow){
+			arrowHtml = "<div class='c-arrow c-left-arrow'></div><div class='c-arrow c-right-arrow'></div>";
+			pluginHtml += arrowHtml;
+		}
+		if(pluginHtml){
+			this.dom.append(pluginHtml);
+		}
+		this.refreshLoadBar();
+		this.refreshPoint(this.pageNum);
+		this.setAutoPlay();
+	}
+	Carousel.prototype.bindEvents = function(){
+		var pageLen = this.dom.find('.page').length;
+		var _this = this;
+		this.dom.on('click', '.c-left-arrow', function(e){
+			_this.pageNum--;
+			if(_this.pageNum < 0){
+				_this.pageNum = pageLen - 1;
+			}
+			_this.changePage(_this.pageNum);
+		})
+
+		this.dom.on('click', '.c-right-arrow', function(e){
+			_this.pageNum++;
+			if(_this.pageNum > pageLen - 1){
+				_this.pageNum = 0;
+			}
+			_this.changePage(_this.pageNum);
+		})
+
+		this.dom.on('click', '.c-point',function(e){
+			_this.pageNum = $(this).index();
+			_this.changePage(_this.pageNum);
+		})
+
+	}
+	Carousel.prototype.refreshPoint = function(pageNum){
+		var $points = this.dom.find('.c-point');
+		if(!$points.length){
+			return;
+		}
+		$points.removeClass('active');
+		$points.eq(pageNum).addClass('active');
+	}
+	Carousel.prototype.setAutoPlay = function(){
+		var _this = this;
+		var pageLen = _this.dom.find('.page').length;
+		this.timer = setInterval(function(){
+			_this.pageNum++;
+			if(_this.pageNum > pageLen -1 ){
+				_this.pageNum = 0;
+			}
+			_this.changePage(_this.pageNum);
+		},_this.duration);
+	}
+	Carousel.prototype.refreshLoadBar = function(){
+		var $loadingBar = this.dom.find('.loading-bar');
+		if(!$loadingBar){
+			return;
+		}
+		var style = "transition: width " + this.duration /1000 + "s; width: 100%;"
+		$loadingBar.attr('style', "");
+		setTimeout(function(){
+			$loadingBar.attr('style', style);
+		},10);
+		
+	}
+	Carousel.prototype.changePage = function(pageNum){
+		this.refreshPoint(pageNum);
+		this.refreshLoadBar();
+		var $pageUl = this.dom.find('.pages-ul');
+		$pageUl.css({
+			left: (-100*pageNum)+"%"
+		});
+	}
+
+	var crs = new Carousel({
+		dom: $('.carousel'),
+		isLoading: true,
+		isArrow: true,
+		isPoint: true
+	})
+
+	</script>
+</body>
+</html>
